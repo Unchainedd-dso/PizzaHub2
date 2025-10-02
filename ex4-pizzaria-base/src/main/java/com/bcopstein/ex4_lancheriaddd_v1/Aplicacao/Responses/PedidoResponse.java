@@ -10,6 +10,6 @@ public class PedidoResponse {
 
     public Pedido getPedido ()
     {
-        return this.pedido;
+        return pedido;
     }
 }
