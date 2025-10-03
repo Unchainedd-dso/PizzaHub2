@@ -18,6 +18,30 @@ create table if not exists itensEstoque(
     foreign key (ingrediente_id) references ingredientes(id)
 );
 
+-- Tabela Pedido
+create table if not exists pedidos (
+  id bigint primary key,
+  cliente_cpf bigint,
+  dataHoraPagamento timestamp not null,
+  status_pedido VARCHAR(20) NOT NULL -- atualizar depois para um create type
+  valor numeric(8,2) not null,
+  impostos numeric(8,2) not null,
+  descontos numeric(8,2) not null,
+  valorCobrado numeric(8,2) not null,
+  foreign key (cliente_cpf) references clientes(cpf)
+)
+
+--Tabela ItemPedido
+create table if not exists item_pedido (
+    pedido_id bigint not null,
+    produto_id bigint not null,
+    primary key (pedido_id, produto_id),
+    quantidade int not null,
+    foreign key (pedido_id) references pedidos(id),
+    foreign key (produto_id) references produtos(id)
+);
+
+
 -- Tabela Receita
 create table if not exists receitas (
   id bigint primary key,
