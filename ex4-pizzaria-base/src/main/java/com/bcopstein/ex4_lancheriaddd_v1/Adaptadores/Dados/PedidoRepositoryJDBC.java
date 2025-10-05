@@ -1,17 +1,33 @@
 package com.bcopstein.ex4_lancheriaddd_v1.Adaptadores.Dados;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Component;
+
+import com.bcopstein.ex4_lancheriaddd_v1.Dominio.Dados.PedidoRepository;
+import com.bcopstein.ex4_lancheriaddd_v1.Dominio.Entidades.Cliente;
+import com.bcopstein.ex4_lancheriaddd_v1.Dominio.Entidades.ItemPedido;
+import com.bcopstein.ex4_lancheriaddd_v1.Dominio.Entidades.Pedido;
+import com.bcopstein.ex4_lancheriaddd_v1.Dominio.Entidades.Pedido.Status;
+
 @Component
 public class PedidoRepositoryJDBC implements PedidoRepository{
     private JdbcTemplate jdbcTemplate;
 
     @Autowired
-    public IngredientesRepositoryJDBC(JdbcTemplate jdbcTemplate) {
+    public PedidoRepositoryJDBC(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
 
     @Override
     public Pedido criaPedido(Pedido pedido) {
-        String sqlPedido = "INSERT INTO pedidos (cliente_cpf, dataHoraPagamento, status_pedido, valor, impostos, desconto, valorCobrado) " +
+        String sqlPedido = "INSERT INTO pedidos (cliente_cpf, dataHoraPagamento, status_pedido, valor, impostos, descontos, valorCobrado) " +
                         "VALUES (?, ?, ?, ?, ?, ?, ?)";
 
         jdbcTemplate.update(sqlPedido,
@@ -33,7 +49,7 @@ public class PedidoRepositoryJDBC implements PedidoRepository{
         for (ItemPedido item : pedido.getItens()) {
             jdbcTemplate.update(sqlItem,
                 pedidoId,
-                item.getProduto().getId(),
+                item.getItem().getId(),
                 item.getQuantidade()
             );
         }
@@ -42,7 +58,7 @@ public class PedidoRepositoryJDBC implements PedidoRepository{
     }
 
     @Override
-    public boolean atualizaPedido(Pedido pedido) {
+    public boolean atualiza(Pedido pedido) {
         String sql = "UPDATE pedidos SET " +
                     "status_pedido = ?, " +
                     "valor = ?, " +
@@ -77,5 +93,31 @@ public class PedidoRepositoryJDBC implements PedidoRepository{
     
     Integer count = jdbcTemplate.queryForObject(sql, Integer.class, clienteCpf);
     return count != null ? count : 0;
-}
+    }
+
+    @Override
+    public Pedido buscaPorId(long id) {
+        String sql = "SELECT * FROM pedidos WHERE id = ?";
+
+        List<Pedido> pedidos = jdbcTemplate.query(sql, (rs, rowNum) -> mapRowToPedido(rs), id);
+
+        return pedidos.isEmpty() ? null : pedidos.get(0);
+    }
+
+    private Pedido mapRowToPedido(ResultSet rs) throws SQLException {
+        long id = rs.getLong("id");
+        String clienteCpf = rs.getString("cliente_cpf");
+        Cliente cliente = new Cliente(clienteCpf);
+
+        LocalDateTime dataHoraPagamento = rs.getTimestamp("dataHoraPagamento").toLocalDateTime();
+        Pedido.Status status = Pedido.Status.valueOf(rs.getString("status_pedido"));
+        double valor = rs.getDouble("valor");
+        double impostos = rs.getDouble("impostos");
+        double desconto = rs.getDouble("descontos");
+        double valorCobrado = rs.getDouble("valorCobrado");
+
+        // Como não temos a lista de itens salva, por enquanto passamos uma lista vazia
+        return new Pedido(id, cliente, dataHoraPagamento, List.of(), status, valor, impostos, desconto, valorCobrado);
+    }
+
 }

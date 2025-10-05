@@ -7,6 +7,7 @@ public class Pedido {
     public enum Status {
         NOVO,
         APROVADO,
+        CANCELADO,
         PAGO,
         AGUARDANDO,
         PREPARACAO,
@@ -14,6 +15,7 @@ public class Pedido {
         TRANSPORTE,
         ENTREGUE
     }
+
     private long id;
     private Cliente cliente;
     private LocalDateTime dataHoraPagamento;
@@ -37,6 +39,38 @@ public class Pedido {
         this.valorCobrado = valorCobrado;
     }
 
+    public void setId(long id) {
+        this.id = id;
+    }
+
+    public void setCliente(Cliente cliente) {
+        this.cliente = cliente;
+    }
+
+    public void setDataHoraPagamento(LocalDateTime dataHoraPagamento) {
+        this.dataHoraPagamento = dataHoraPagamento;
+    }
+
+    public void setItens(List<ItemPedido> itens) {
+        this.itens = itens;
+    }
+
+    public void setValor(double valor) {
+        this.valor = valor;
+    }
+
+    public void setImpostos(double impostos) {
+        this.impostos = impostos;
+    }
+
+    public void setDesconto(double desconto) {
+        this.desconto = desconto;
+    }
+
+    public void setValorCobrado(double valorCobrado) {
+        this.valorCobrado = valorCobrado;
+    }
+
     public long getId() {
         return id;
     }
@@ -57,7 +91,7 @@ public class Pedido {
         return status;
     }
 
-    public void setStatus(Status status){
+    public void setStatus(Status status) {
         this.status = status;
     }
 

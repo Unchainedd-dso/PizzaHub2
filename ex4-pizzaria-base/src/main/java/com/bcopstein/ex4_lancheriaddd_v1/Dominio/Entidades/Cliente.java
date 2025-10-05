@@ -15,6 +15,10 @@ public class Cliente {
         this.email = email;
     }
 
+    public Cliente(String cpf) {
+        this.cpf = cpf;
+    }
+
     public String getCpf() { return cpf; }
     public String getNome() { return nome; }
     public String getCelular() { return celular; }
