@@ -123,10 +123,9 @@ public class PedidoRepositoryJDBC implements PedidoRepository{
         return new Pedido(id, cliente, dataHoraPagamento, List.of(), status, valor, impostos, desconto, valorCobrado);
     }
 
-    @Override
-    public List<Pedido> listaPorIntervalo(Timestamp dataInicio, Timestamp dataFinal) throws SQLException {
-        List<Pedido> pedidos = new ArrayList<>();
 
+    @Override
+    public List<Pedido> listaPorIntervalo(Timestamp dataInicio, Timestamp dataFinal) {
         String sql = """
             SELECT id, cliente_cpf, dataHoraPagamento, status_pedido,
                 valor, impostos, descontos, valorCobrado
@@ -135,37 +134,24 @@ public class PedidoRepositoryJDBC implements PedidoRepository{
             ORDER BY dataHoraPagamento
         """;
 
-        // Exemplo: usando DataSource injetado
-        try (Connection connection = dataSource.getConnection();
-            PreparedStatement stmt = connection.prepareStatement(sql)) {
+        return jdbcTemplate.query(sql, (rs, rowNum) -> mapeiaParaPedido(rs), dataInicio, dataFinal);
+    }
 
-            stmt.setTimestamp(1, dataInicio);
-            stmt.setTimestamp(2, dataFinal);
+    private Pedido mapeiaParaPedido(ResultSet rs) throws SQLException {
+        long id = rs.getLong("id");
+        String clienteCpf = rs.getString("cliente_cpf");
+        Cliente cliente = new Cliente(clienteCpf);
 
-            try (ResultSet rs = stmt.executeQuery()) {
-                while (rs.next()) {
-                    Pedido pedido = new Pedido();
-                    pedido.setId(rs.getLong("id"));
-                    pedido.setClienteCpf(rs.getLong("cliente_cpf")); // ou getString se for VARCHAR
+        LocalDateTime dataHoraPagamento = rs.getTimestamp("dataHoraPagamento").toLocalDateTime();
+        Pedido.Status status = Pedido.Status.valueOf(rs.getString("status_pedido"));
+        double valor = rs.getDouble("valor");
+        double impostos = rs.getDouble("impostos");
+        double desconto = rs.getDouble("descontos");
+        double valorCobrado = rs.getDouble("valorCobrado");
 
-                    Timestamp timeStamp = rs.getTimestamp("dataHoraPagamento");
-                    if (timeStamp != null) {
-                        pedido.setDataHoraPagamento(timeStamp.toLocalDateTime());
-                    }
+        return new Pedido(id, cliente, dataHoraPagamento, List.of(), status, valor, impostos, desconto, valorCobrado);
+    }
 
-                    pedido.setStatusPedido(rs.getString("status_pedido"));
-                    pedido.setValor(rs.getBigDecimal("valor"));
-                    pedido.setImpostos(rs.getBigDecimal("impostos"));
-                    pedido.setDescontos(rs.getBigDecimal("descontos"));
-                    pedido.setValorCobrado(rs.getBigDecimal("valorCobrado"));
-
-                    pedidos.add(pedido);
-                }
-            }
-        }
-
-        return pedidos;
-}
 
 
 }
