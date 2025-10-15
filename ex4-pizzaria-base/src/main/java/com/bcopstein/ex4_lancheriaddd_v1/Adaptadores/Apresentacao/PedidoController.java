@@ -23,6 +23,7 @@ import com.bcopstein.ex4_lancheriaddd_v1.Aplicacao.AprovaPedidoUC;
 import com.bcopstein.ex4_lancheriaddd_v1.Aplicacao.CancelaPedidoUC;
 import com.bcopstein.ex4_lancheriaddd_v1.Aplicacao.ConsultaStatusPedidoUC;
 import com.bcopstein.ex4_lancheriaddd_v1.Aplicacao.ListaPedidosPorIntervaloUC;
+import com.bcopstein.ex4_lancheriaddd_v1.Aplicacao.PagarPedidoUC;
 import com.bcopstein.ex4_lancheriaddd_v1.Aplicacao.Request.PedidoRequest;
 import com.bcopstein.ex4_lancheriaddd_v1.Aplicacao.Responses.PedidoResponse;
 import com.bcopstein.ex4_lancheriaddd_v1.Aplicacao.Responses.PedidoResponseUC6;
@@ -38,13 +39,15 @@ public class PedidoController {
     private final ConsultaStatusPedidoUC consultaStatusPedidoUC;
     private final CancelaPedidoUC cancelaPedidoUC;
     private final ListaPedidosPorIntervaloUC listaPedidosPorIntervaloUC;
+    private final PagarPedidoUC pagarPedidoUC;
 
     @Autowired
-    public PedidoController(AprovaPedidoUC aprovaPedidoUC, ConsultaStatusPedidoUC consultaStatusPedidoUC, CancelaPedidoUC cancelaPedidoUC, ListaPedidosPorIntervaloUC listaPedidosPorIntervaloUC) {
+    public PedidoController(PagarPedidoUC pagarPedidoUC, AprovaPedidoUC aprovaPedidoUC, ConsultaStatusPedidoUC consultaStatusPedidoUC, CancelaPedidoUC cancelaPedidoUC, ListaPedidosPorIntervaloUC listaPedidosPorIntervaloUC) {
         this.aprovaPedidoUC = aprovaPedidoUC;
         this.consultaStatusPedidoUC = consultaStatusPedidoUC;
         this.cancelaPedidoUC = cancelaPedidoUC;
         this.listaPedidosPorIntervaloUC = listaPedidosPorIntervaloUC;
+        this.pagarPedidoUC = pagarPedidoUC;
     }
 
     @PostMapping("/submetePedido")
@@ -91,6 +94,14 @@ public class PedidoController {
                 .collect(Collectors.toList());
 
         return ResponseEntity.ok(pedidosPresenter);
+    }
+
+    @GetMapping("/pagarPedido/{id}")
+    @CrossOrigin("*")
+    public ResponseEntity<PedidoStatusPresenter> pagarPedido(@PathVariable long id) {
+        PedidoStatusResponse pedido = pagarPedidoUC.executar(id);
+        PedidoStatusPresenter presenter = new PedidoStatusPresenter(pedido.getId(), pedido.getStatus());
+        return ResponseEntity.ok(presenter);
     }
 
 }

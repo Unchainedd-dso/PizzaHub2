@@ -2,6 +2,7 @@ package com.bcopstein.ex4_lancheriaddd_v1.Aplicacao;
 
 import com.bcopstein.ex4_lancheriaddd_v1.Aplicacao.Request.PedidoRequest;
 import com.bcopstein.ex4_lancheriaddd_v1.Aplicacao.Responses.PedidoResponse;
+import com.bcopstein.ex4_lancheriaddd_v1.Aplicacao.Responses.PedidoStatusResponse;
 import com.bcopstein.ex4_lancheriaddd_v1.Dominio.Entidades.ItemPedido;
 import com.bcopstein.ex4_lancheriaddd_v1.Dominio.Entidades.Pedido;
 import com.bcopstein.ex4_lancheriaddd_v1.Dominio.Servicos.CozinhaService;
@@ -23,18 +24,17 @@ public class PagarPedidoUC
         this.cozinhaService = cozinhaService;
     }
 
-    public PedidoStatusResponse executar(PedidoRequest pedidoRequest)
-    {
-        Pedido pedido = pedidoService.criaPedido(pedidoRequest);
+    public PedidoStatusResponse executar(Long id) {
+        Pedido pedido = pedidoService.buscaPorId(id);
+        pedido.setStatus(Pedido.Status.PAGO);
+        pedidoService.atualizaPedido(pedido);
 
+        // Envia para a cozinha e deixa ela cuidar do fluxo (PREPARACAO → PRONTO → SAÍDA)
         cozinhaService.chegadaDePedido(pedido);
 
-        pedido.setStatus(Pedido.Status.TRANSPORTE);
-        System.out.println("Pedido em rota de entrega");
-        
-        pedido.setStatus(Pedido.Status.ENTREGUE);
-        System.out.println("Pedido entregue");
+        System.out.println("Pedido enviado para a cozinha");
 
+        // Aqui o status final ainda é PAGO, a cozinha vai mudar depois
         return new PedidoStatusResponse(pedido);
     }
 }

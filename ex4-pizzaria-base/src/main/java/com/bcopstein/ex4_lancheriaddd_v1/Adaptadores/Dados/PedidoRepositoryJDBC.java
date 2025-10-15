@@ -66,7 +66,7 @@ public class PedidoRepositoryJDBC implements PedidoRepository{
                     "status_pedido = ?, " +
                     "valor = ?, " +
                     "impostos = ?, " +
-                    "desconto = ?, " +
+                    "descontos = ?, " +
                     "valorCobrado = ? " +
                     "WHERE id = ?";
 

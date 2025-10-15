@@ -18,21 +18,24 @@ public class PedidoService {
     private final PedidoRepository pedidoRepository;
     private final ItensEstoqueRepository itensEstoqueRepository;
     private final ProdutosRepository produtoRepository;
+    private final ImpostoService impostoService;
+    private final DescontoService descontoService;
 
     @Autowired
     public PedidoService(
             PedidoRepository pedidoRepository,
             ItensEstoqueRepository itensEstoqueRepository,
-            ProdutosRepository produtoRepository) {
+            ProdutosRepository produtoRepository,
+            ImpostoService impostoService,
+            DescontoService descontoService) {
 
         this.pedidoRepository = pedidoRepository;
         this.itensEstoqueRepository = itensEstoqueRepository;
         this.produtoRepository = produtoRepository;
+        this.impostoService = impostoService;
+        this.descontoService = descontoService;
     }
 
-    /**
-     * Cria o Pedido com base no DTO recebido da requisição.
-     */
     public Pedido criaPedido(PedidoRequest pedidoRequest) {
         // Cria cliente apenas com CPF (sem buscar no banco)
         Cliente cliente = new Cliente(pedidoRequest.getClienteCpf());
@@ -61,11 +64,20 @@ public class PedidoService {
         return pedidoRepository.criaPedido(pedido);
     }
 
+    public boolean atualizaPedido(Pedido pedido){
+        Pedido ped = buscaPorId(pedido.getId());
+        if (ped != null) {
+            pedidoRepository.atualiza(pedido);
+            return true;
+        }
+        else{
+            return false;
+        }
+        
+    }
+
     
 
-    /**
-     * Aprova ou rejeita o pedido.
-     */
     public Pedido aprovaPedido(Pedido pedido) {
         if (verificaItens(pedido).isEmpty()) {
             double custoFinal = calculaCusto(pedido);
@@ -105,9 +117,7 @@ public class PedidoService {
         return itensEmFalta;
     }
 
-    /**
-     * Calcula valor, impostos, descontos e valor final.
-     */
+
     public double calculaCusto(Pedido pedido) {
         double valor = pedido.getItens().stream()
                 .mapToDouble(item -> (item.getItem().getPreco() * item.getQuantidade()) / 100)
@@ -116,15 +126,18 @@ public class PedidoService {
         pedido.setValor(valor);
         double valorCobrado = valor;
 
-        if (pedidoRepository.quantidadePedidosUltimos20Dias(pedido.getCliente().getCpf()) >= 3) {
-            valorCobrado *= 0.93;
-            pedido.setDesconto(0.07);
-        }
+        int pedidosRecentes = pedidoRepository.quantidadePedidosUltimos20Dias(pedido.getCliente().getCpf());
 
-        double impostos = valorCobrado * 0.10;
+        // aplica desconto via serviço
+        double valorComDesconto = descontoService.aplicarDesconto(valorCobrado, pedidosRecentes);
+        double percentualDesconto = descontoService.getPercentualDesconto(pedidosRecentes);
+        pedido.setDesconto(percentualDesconto);
+        
+
+        double impostos = impostoService.calcularImpostos(valorComDesconto);
         pedido.setImpostos(impostos);
 
-        valorCobrado += impostos;
+        valorCobrado = valorComDesconto + impostos;
         pedido.setValorCobrado(valorCobrado);
 
         return valorCobrado;
