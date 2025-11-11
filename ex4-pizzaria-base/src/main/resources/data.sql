@@ -66,3 +66,7 @@ INSERT INTO cardapio_produto (cardapio_id,produto_id) VALUES (1,3);
 
 INSERT INTO cardapio_produto (cardapio_id,produto_id) VALUES (2,1);
 INSERT INTO cardapio_produto (cardapio_id,produto_id) VALUES (2,3);
+
+-- Valores de desconto tem que estar no ENUN TipoDesconto existente em Dominio/Servicos
+INSERT INTO descontos (nome_desconto, percentual) VALUES ('DESCONTO_FIDELIDADE', 0.07);
+INSERT INTO descontos (nome_desconto, percentual) VALUES ('DESCONTO_GASTADOR', 0.15);

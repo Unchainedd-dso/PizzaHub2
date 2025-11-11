@@ -9,8 +9,8 @@ public interface PedidoRepository {
     Pedido criaPedido (Pedido pedido);
     Pedido buscaPorId(long id);
     boolean atualiza (Pedido pedido);
-    int quantidadePedidosUltimos20Dias(String clienteCpf);
-    float valorGastoUltimos30Dias(String clienteCpf);
+    int quantidadePedidosUltimos20Dias(String clienteCpf); // Talvez seja melhor mover paa o DescontosRepository
+    double valorGastoUltimos30Dias(String clienteCpf);      // Talvez seja melhor mover paa o DescontosRepository
     boolean mudaStatus (long pedidoId, Pedido.Status status);
     List<Pedido> listaPorIntervalo(Timestamp dataInicio, Timestamp dataFinal);
 }

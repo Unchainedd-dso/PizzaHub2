@@ -3,11 +3,9 @@ package com.Grupo01.PizzaHUB.Dominio.Servicos;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.Grupo01.PizzaHUB.Aplicacao.Request.ItemPedidoRequest;
 import com.Grupo01.PizzaHUB.Aplicacao.Request.PedidoRequest;
 import com.Grupo01.PizzaHUB.Dominio.Dados.*;
 import com.Grupo01.PizzaHUB.Dominio.Entidades.*;
-import com.Grupo01.PizzaHUB.Dominio.Entidades.Pedido.Status;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
@@ -79,9 +77,9 @@ public class PedidoService {
 
     
 
-    public Pedido aprovaPedido(Pedido pedido) {
+    public Pedido aprovaPedido(Cliente cliente, Pedido pedido) {
         if (verificaItens(pedido).isEmpty()) {
-            double custoFinal = calculaCusto(pedido);
+            double custoFinal = calculaCusto(cliente, pedido);
             pedido.setStatus(Pedido.Status.APROVADO);
             pedido.setValorCobrado(custoFinal);
             pedidoRepository.criaPedido(pedido);
@@ -119,7 +117,7 @@ public class PedidoService {
     }
 
 
-    public double calculaCusto(Pedido pedido) {
+    public double calculaCusto(Cliente cliente, Pedido pedido) {
         double valor = pedido.getItens().stream()
                 .mapToDouble(item -> (item.getItem().getPreco() * item.getQuantidade()) / 100)
                 .sum();
@@ -127,14 +125,9 @@ public class PedidoService {
         pedido.setValor(valor);
         double valorCobrado = valor;
 
-        int pedidosRecentes = pedidoRepository.quantidadePedidosUltimos20Dias(pedido.getCliente().getCpf());
-        double valorGastoUltimos30dias =  pedidoRepository.valorGastoUltimos30Dias(pedido.getCliente().getCpf());
-        // Esse valor tem que poder ser mudado pelo USUÀRIO MASTER
-        TipoDesconto tipoDesconto = TipoDesconto.CLIENTE_FREQUENTE;
-
         // aplica desconto via serviço
-        double valorComDesconto = descontoService.aplicarDesconto(valorCobrado, pedidosRecentes, valorGastoUltimos30dias, tipoDesconto);
-        double percentualDesconto = descontoService.getPercentualDesconto(pedidosRecentes, valorGastoUltimos30dias, tipoDesconto);
+        double valorComDesconto = descontoService.aplicarDescontoAtivo(cliente, pedido);
+        double percentualDesconto = descontoService.percentagemDesconto();
         pedido.setDesconto(percentualDesconto);
         
 
@@ -163,6 +156,14 @@ public class PedidoService {
 
         List<Pedido> pedidos = pedidoRepository.listaPorIntervalo(tsInicio, tsFinal);
         return pedidos;
+    }
+
+    public int quantidadePedidosUltimos20Dias(String clienteCpf){
+        return pedidoRepository.quantidadePedidosUltimos20Dias(clienteCpf);
+    }
+
+    public double valorGastoUltimos30Dias(String clienteCpf){
+        return pedidoRepository.valorGastoUltimos30Dias(clienteCpf);
     }
 
 }

@@ -87,3 +87,11 @@ create table if not exists cardapio_produto (
   foreign key (cardapio_id) references cardapios(id),
   foreign key (produto_id) references produtos(id)
 );
+
+-- Tabela descontos
+create table if not exists descontos (
+  id serial primary key,
+  nome_desconto varchar(30) not null,
+  percentual numeric(5,2) not null,
+  desconto_aplicado boolean not null default false 
+);

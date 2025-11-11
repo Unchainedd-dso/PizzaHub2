@@ -1,8 +1,6 @@
 package com.Grupo01.PizzaHUB.Aplicacao.Responses;
 
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 
 import com.Grupo01.PizzaHUB.Dominio.Entidades.Cardapio;
 import com.Grupo01.PizzaHUB.Dominio.Entidades.Produto;

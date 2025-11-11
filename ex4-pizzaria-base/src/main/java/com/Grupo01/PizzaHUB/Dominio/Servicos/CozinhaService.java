@@ -9,7 +9,6 @@ import java.util.concurrent.TimeUnit;
 import org.springframework.stereotype.Service;
 
 import com.Grupo01.PizzaHUB.Dominio.Entidades.Pedido;
-import com.Grupo01.PizzaHUB.Dominio.Servicos.PedidoService;
 
 @Service
 public class CozinhaService {

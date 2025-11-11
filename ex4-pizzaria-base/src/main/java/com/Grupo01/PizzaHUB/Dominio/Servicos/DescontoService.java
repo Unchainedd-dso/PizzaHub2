@@ -1,44 +1,61 @@
 package com.Grupo01.PizzaHUB.Dominio.Servicos;
 
-import org.springframework.stereotype.Service;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
-@Service
+import org.springframework.beans.factory.annotation.Autowired;
+
+import com.Grupo01.PizzaHUB.Dominio.Dados.DescontosRepository;
+import com.Grupo01.PizzaHUB.Dominio.Entidades.Cliente;
+import com.Grupo01.PizzaHUB.Dominio.Entidades.Desconto;
+import com.Grupo01.PizzaHUB.Dominio.Entidades.Pedido;
 public class DescontoService {
-
-    private static final double DESCONTO_FIDELIDADE = 0.07; // 7%
-    private static final double DESCONTO_VALOR_GASTO = 0.15; // 15%
-
-    public double aplicarDesconto(double valorBase, int quantidadePedidosRecentes, double valorGastoUltimos30Dias, TipoDesconto tipoDesconto) {
-        if (valorBase < 0) {
-            throw new IllegalArgumentException("Valor base inválido para cálculo de desconto.");
-        }
-
-        // Talvez algum tipo de construtor seja mais recomendável
-        if (tipoDesconto == TipoDesconto.CLIENTE_FREQUENTE){
-            if (quantidadePedidosRecentes >= 3) {
-                // aplica desconto de 7%
-                return valorBase * (1 - DESCONTO_FIDELIDADE);
-            }
-        }
-        else if (tipoDesconto == TipoDesconto.CLIENTE_GASTADOR){
-            if (valorGastoUltimos30Dias >= 500){
-                return valorBase * (1 - DESCONTO_VALOR_GASTO);
-            }
-        }
-
-        // sem desconto
-        return valorBase;
+    private final DescontosRepository descontosRepository;
+    private final Map<String, DescontoConcretoI> descontosAplicaveisPorNome;
+    
+    // Todos os descontos que forem Beans, serão colocados dentro dessa lista
+    @Autowired
+    public DescontoService(DescontosRepository descontosRepository,  List<DescontoConcretoI> descontosDiferentes){
+        this.descontosRepository = descontosRepository;
+        // Monta um "factory" de estratégias baseado no nome do desconto
+        this.descontosAplicaveisPorNome = descontosDiferentes.stream()
+                .collect(Collectors.toMap(
+                        DescontoConcretoI::getNome,
+                        descontoContreto -> descontoContreto
+                ));
     }
 
-    public double getPercentualDesconto(int quantidadePedidosRecentes, double valorGastoUltimos30Dias, TipoDesconto tipoDesconto) {
-        if (tipoDesconto == TipoDesconto.CLIENTE_FREQUENTE){
-            return quantidadePedidosRecentes >= 3 ? DESCONTO_FIDELIDADE : 0.0;
-        }
-        else if (tipoDesconto == TipoDesconto.CLIENTE_GASTADOR){
-            return valorGastoUltimos30Dias >= 500 ? DESCONTO_VALOR_GASTO : 0.0;
-        }
-        // Retorno default
-        return 0.0;
+    public boolean decideDescontoAtivo(int id){
+        return descontosRepository.decideDescontoAtivo(id);
     }
-}
+
+    public List<Desconto> RecuperaTodosDescontos(){
+        return descontosRepository.listaTodos();
+    } 
+
+    public double percentagemDesconto(){
+        Desconto descontoAtivo = descontosRepository.retornaDescontoAtivo();
+        return descontoAtivo.getDesconto();
+    }
+
+    // Procura na tabela qual que é o desconto ativo e o aplica
+    public double aplicarDescontoAtivo(Cliente cliente, Pedido pedido){
+        // Desconto escolhido no momento pelo Usuario MASTER
+        Desconto descontoAtivo = descontosRepository.retornaDescontoAtivo();
+        // Se for a resposta padrao no caso de inexistencia de desconto ativo, apenas retorna o valor cheio
+        if (descontoAtivo.getId() == -1){
+            return pedido.getValor();
+        }
+        // Caso contrario, escolhe o desconto certo dentre todos que existem -> pelo nome
+        // Os nomes dos descontos tem que ser os exatamente os mesmos nomes que estão na tabela SQL
+        else{
+            String nomeDescontoAtivo =  descontoAtivo.getNome();
+            double percentagemDesconto = descontoAtivo.getPer();
+            DescontoConcretoI descontoEscolhido =  descontosAplicaveisPorNome.get(nomeDescontoAtivo);
+
+            return descontoEscolhido.aplicarDesconto(cliente, pedido, percentagemDesconto);
+            }
+    
+    }
 }

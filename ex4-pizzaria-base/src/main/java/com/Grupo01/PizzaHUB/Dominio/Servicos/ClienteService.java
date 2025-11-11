@@ -1,5 +1,6 @@
 package com.Grupo01.PizzaHUB.Dominio.Servicos;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.Grupo01.PizzaHUB.Dominio.Dados.ClienteRepository;
@@ -10,6 +11,7 @@ public class ClienteService {
 
     private final ClienteRepository clienteRepository;
 
+    @Autowired
     public ClienteService(ClienteRepository clienteRepository) {
         this.clienteRepository = clienteRepository;
     }

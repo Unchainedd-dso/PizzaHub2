@@ -5,7 +5,6 @@ import java.time.LocalDateTime;
 import com.Grupo01.PizzaHUB.Dominio.Entidades.Pedido;
 
 public class PedidoResponseUC6{
-    private Pedido pedido;
     private long id;
     private String clienteCpf;
     private LocalDateTime dataHoraPagamento;

@@ -8,7 +8,6 @@ import org.springframework.stereotype.Component;
 
 import com.Grupo01.PizzaHUB.Dominio.Dados.ProdutosRepository;
 import com.Grupo01.PizzaHUB.Dominio.Dados.ReceitasRepository;
-import com.Grupo01.PizzaHUB.Dominio.Entidades.Ingrediente;
 import com.Grupo01.PizzaHUB.Dominio.Entidades.Produto;
 import com.Grupo01.PizzaHUB.Dominio.Entidades.Receita;
 

@@ -3,10 +3,7 @@ package com.Grupo01.PizzaHUB.Aplicacao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.Grupo01.PizzaHUB.Aplicacao.Request.PedidoRequest;
-import com.Grupo01.PizzaHUB.Aplicacao.Responses.PedidoResponse;
 import com.Grupo01.PizzaHUB.Aplicacao.Responses.PedidoStatusResponse;
-import com.Grupo01.PizzaHUB.Dominio.Entidades.ItemPedido;
 import com.Grupo01.PizzaHUB.Dominio.Entidades.Pedido;
 import com.Grupo01.PizzaHUB.Dominio.Servicos.CozinhaService;
 import com.Grupo01.PizzaHUB.Dominio.Servicos.PedidoService;
