@@ -21,7 +21,7 @@ public class DescontosRepositoryJDBC implements DescontosRepository {
     }
 
     @Override
-    public boolean decideDescontoAtivo(int id) {
+    public boolean decideDescontoAtivo(long id) {
         // Verifica se o id existe antes de alterar qualquer registro
         String sqlExiste = "SELECT COUNT(*) FROM descontos WHERE id = ?";
         // O integer.class é para converter o resultado de sqlExiste para Inteiro

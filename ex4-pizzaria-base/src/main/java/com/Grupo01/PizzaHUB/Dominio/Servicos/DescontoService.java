@@ -28,7 +28,7 @@ public class DescontoService {
                 ));
     }
 
-    public boolean decideDescontoAtivo(int id){
+    public boolean decideDescontoAtivo(long id){
         return descontosRepository.decideDescontoAtivo(id);
     }
 

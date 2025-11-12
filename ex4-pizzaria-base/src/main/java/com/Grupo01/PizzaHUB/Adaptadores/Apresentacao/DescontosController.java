@@ -5,12 +5,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.Grupo01.PizzaHUB.Adaptadores.Apresentacao.Presenters.DescontoPresenter;
-
+import com.Grupo01.PizzaHUB.Aplicacao.DecideDescontoAtivoUC;
 import com.Grupo01.PizzaHUB.Aplicacao.RecuperaListaDescontosUC;
 
 import com.Grupo01.PizzaHUB.Aplicacao.Responses.DescontoResponse;
@@ -19,21 +21,30 @@ import com.Grupo01.PizzaHUB.Aplicacao.Responses.DescontoResponse;
 public class DescontosController {
 
     public final RecuperaListaDescontosUC recuperaListaDescontosUC;
+    private final DecideDescontoAtivoUC decideDescontoAtivoUC;
 
     @Autowired
-    public DescontosController(RecuperaListaDescontosUC recuperaListaDescontosUC) {
+    public DescontosController(RecuperaListaDescontosUC recuperaListaDescontosUC, DecideDescontoAtivoUC decideDescontoAtivoUC) {
         this.recuperaListaDescontosUC = recuperaListaDescontosUC;
+        this.decideDescontoAtivoUC = decideDescontoAtivoUC;
     }
 
     // Mostra ao usuário uma lista com todos os descontos disponíveis
-    @GetMapping("/descontos_disponiveis")
+    @GetMapping("/descontosDisponiveis")
     @CrossOrigin("*")
-    public List<DescontoPresenter> consultaDescontos() {
+    public ResponseEntity<List<DescontoPresenter>> consultaDescontos() {
         List<DescontoResponse> listaDescontosResponse = recuperaListaDescontosUC.executar();
         List<DescontoPresenter> listaDescontosPresenter = new ArrayList<>();
 
         listaDescontosResponse.forEach(response -> listaDescontosPresenter.add(new DescontoPresenter(response)));
-        return listaDescontosPresenter;
+        return ResponseEntity.ok(listaDescontosPresenter);
+    }
+
+    @GetMapping("/DecideDesconto/{id}")
+    @CrossOrigin("*")
+    public ResponseEntity<Boolean> decideDescontoAplicado(@PathVariable long id) {
+        boolean descontoAtivoAlterado = decideDescontoAtivoUC.executar(id);
+        return ResponseEntity.ok(descontoAtivoAlterado);
     }
 
 }

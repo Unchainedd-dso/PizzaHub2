@@ -1,3 +1,25 @@
+-- Solução temporária 
+-- Desativa restrições temporariamente (caso haja FKs)
+SET session_replication_role = replica;
+
+-- Remove tabelas filhas (de associação) primeiro
+DROP TABLE IF EXISTS cardapio_produto CASCADE;
+DROP TABLE IF EXISTS produto_receita CASCADE;
+DROP TABLE IF EXISTS receita_ingrediente CASCADE;
+
+-- Agora as tabelas principais
+DROP TABLE IF EXISTS itensEstoque CASCADE;
+DROP TABLE IF EXISTS clientes CASCADE;
+DROP TABLE IF EXISTS ingredientes CASCADE;
+DROP TABLE IF EXISTS receitas CASCADE;
+DROP TABLE IF EXISTS produtos CASCADE;
+DROP TABLE IF EXISTS cardapios CASCADE;
+DROP TABLE IF EXISTS descontos CASCADE;
+
+-- Reativa as restrições
+SET session_replication_role = DEFAULT;
+
+-- -------------------------------------------------------------------------
 create table if not exists clientes(
   cpf varchar(15) not null primary key,
   nome varchar(100) not null,

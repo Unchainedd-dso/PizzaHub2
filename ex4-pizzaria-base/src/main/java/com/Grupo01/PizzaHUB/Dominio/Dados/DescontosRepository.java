@@ -8,7 +8,7 @@ public interface DescontosRepository {
     List<Desconto> listaTodos();
     // Para ser usado no UC em que o usuário MASTER seta qual desconto vai ser o ativo no momento
     // Por enquanto, apenas um desconto pode estar ativo por vez
-    boolean decideDescontoAtivo(int id);
+    boolean decideDescontoAtivo(long id);
     // Retorna a percentagem do desconto que está ativo no momento
     double percentagemDesconto(String nome_desconto);
     // Retorna o desconto inteiro que está ativo no momento
